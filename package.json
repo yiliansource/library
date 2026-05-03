@@ -1,29 +1,31 @@
 {
-  "name": "library",
-  "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "generate-types": "wrangler types"
-  },
-  "dependencies": {
-    "@astrojs/cloudflare": "^13.3.0",
-    "@tailwindcss/vite": "^4.2.4",
-    "astro": "^6.2.1",
-    "phosphor-astro": "^2.1.0",
-    "tailwindcss": "^4.2.4",
-    "wrangler": "^4.87.0"
-  },
-  "overrides": {
-    "vite": "^7"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.4.14"
-  }
+	"name": "library",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"generate-types": "wrangler types"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^13.3.0",
+		"@tailwindcss/vite": "^4.2.4",
+		"astro": "^6.2.1",
+		"phosphor-astro": "^2.1.0",
+		"tailwindcss": "^4.2.4",
+		"wrangler": "^4.87.0"
+	},
+	"overrides": {
+		"vite": "^7"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.14",
+		"vite": "^8.0.10"
+	},
+	"packageManager": "yarn@4.14.1"
 }
