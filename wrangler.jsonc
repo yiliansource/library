@@ -1,0 +1,31 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2026-05-03",
+	"compatibility_flags": [
+		"global_fetch_strictly_public"
+	],
+	"name": "library",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			"binding": "library_data",
+			"database_name": "library-data",
+			"database_id": "10b2b088-de7e-44bf-91f0-c617c3f66251",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "library_files",
+			"bucket_name": "library-files",
+			"remote": true,
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}

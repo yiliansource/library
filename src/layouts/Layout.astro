@@ -1,3 +1,7 @@
+---
+import "../styles/global.css";
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -9,15 +13,26 @@
 		<title>Astro Basics</title>
 	</head>
 	<body>
-		<slot />
+		<div
+			class="mx-auto grid max-w-7xl grid-cols-1 px-3 lg:grid-cols-[1fr_1.5fr] lg:gap-5"
+		>
+			<div
+				class="flex h-screen flex-col justify-between pt-12 lg:sticky lg:top-0 lg:w-105 lg:pt-24"
+			>
+				<header class="select-none">
+					<p class="mb-1 text-xl text-zinc-600 dark:text-zinc-400">
+						Hi, my name is
+					</p>
+					<h1 class="mb-8 text-6xl font-bold">
+						<a href="/">Ian Hornik.</a>
+					</h1>
+				</header>
+			</div>
+			<main
+				class="flex grow flex-col pb-24 lg:pb-40 *:pt-16 *:pb-8 [&>*:first-child]:pt-24"
+			>
+				<slot />
+			</main>
+		</div>
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
