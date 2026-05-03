@@ -32,10 +32,10 @@ function passwordForm(id: string, error?: string) {
     <main style="max-width: 32rem; margin: 4rem auto; font-family: system-ui, sans-serif;">
       <h1>Protected file</h1>
       ${error ? `<p style="color: crimson;">${error}</p>` : ""}
-      <form method="post" action="/files/${encodeURIComponent(id)}">
+      <form method="post" action="/files/${encodeURIComponent(id)}" autocomplete="off">
         <label>
           Password
-          <input type="password" name="password" required autofocus />
+          <input type="password" name="password" required autofocus autocomplete="off" />
         </label>
         <button type="submit">Open file</button>
       </form>
@@ -215,7 +215,9 @@ export const POST: APIRoute = async ({ params, request }) => {
 	} catch (e) {
 		console.error(e);
 		return new Response(
-			"Password verification is not configured correctly",
+			"Password verification is not configured correctly" +
+				"\n" +
+				(e as Error).message,
 			{
 				status: 500,
 			},
