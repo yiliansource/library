@@ -1,14 +1,13 @@
 ---
 import { env } from "cloudflare:workers";
-
-import FileIcon from "phosphor-astro/FilePdf.astro";
-import LockIcon from "phosphor-astro/LockFill.astro";
+import FilePdfIcon from "phosphor-astro/FilePdf.astro";
 import Layout from "../layouts/Layout.astro";
 
 interface FileRow {
 	file_id: string;
 	display_name: string | null;
 	description: string | null;
+	tags: string | null;
 	file_name: string;
 	updated_at: string;
 	password_hash: string | null;
@@ -24,30 +23,58 @@ const { results } = await env.library_data
 		{
 			results.map((file) => {
 				return (
-					<div class="py-6 flex flex-row gap-2">
-						<div class="flex flex-col">
-							<p class="text-xl">{file.display_name}</p>
-							<div class="mb-2">
-								<a
-									class="inline-flex items-center gap-1 text-sm text-gray-500"
-									href={"files/" + file.file_name}
-									target="_blank"
-								>
-									<span>{file.file_name}</span>
-									<span class="text-red-600 size-4">
-										<FileIcon />
-									</span>
-									{file.password_hash && (
-										<span class="text-yellow-500 size-3">
-											<LockIcon />
-										</span>
-									)}
-								</a>
+					<div class="group px-3 py-6 flex flex-col hover:bg-black/5">
+						<div class="flex flex-row gap-2">
+							<div class="grow">
+								<p class="text-xl font-semibold">
+									{file.display_name}
+								</p>
+								<p class="mb-2 text-sm inline-flex flex-row gap-1 text-neutral-600">
+									{[
+										...(file.tags
+											?.split(",")
+											.map((s) => s.trim()) ?? []),
+										new Date(file.updated_at).getFullYear(),
+									].map((l, i, a) => (
+										<>
+											<span>{l}</span>
+											{i + 1 !== a.length && (
+												<span>·</span>
+											)}
+										</>
+									))}
+								</p>
 							</div>
-							<p>{file.description}</p>
+							<div class="ml-auto mr-0 shrink-0 pt-1">
+								<p class="text-sm text-neutral-600">
+									{new Date(
+										file.updated_at,
+									).toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})}
+								</p>
+							</div>
 						</div>
-						<div class="ml-auto mr-0 shrink-0">
-							<p class="text-sm">{file.updated_at}</p>
+						<p class="mb-4">{file.description}</p>
+						<div class="flex flex-row items-center">
+							<a
+								class="py-1 inline-flex flex-row items-center gap-1 text-red-600 cursor-pointer"
+								target="_blank"
+								href={"/files/" + file.file_name}
+							>
+								<FilePdfIcon class="inline-block size-5" />
+								<span class="text-xs uppercase font-semibold">
+									View
+								</span>
+							</a>
+							{file.password_hash && (
+								<span class="text-sm text-neutral-600">
+									<span class="ml-2 mr-1">·</span>
+									<span>Password required</span>
+								</span>
+							)}
 						</div>
 					</div>
 				);

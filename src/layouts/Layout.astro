@@ -1,4 +1,5 @@
 ---
+import "@fontsource-variable/inter/wght.css";
 import "../styles/global.css";
 ---
 
@@ -10,24 +11,31 @@ import "../styles/global.css";
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>Library — Ian Hornik</title>
 	</head>
 	<body>
 		<div
 			class="mx-auto grid max-w-7xl grid-cols-1 px-3 lg:grid-cols-[1fr_1.5fr] lg:gap-5"
 		>
 			<div
-				class="flex h-screen flex-col justify-between pt-12 lg:sticky lg:top-0 lg:w-105 lg:pt-24"
+				class="flex flex-col justify-between pt-12 lg:sticky lg:top-0 lg:w-105 lg:pt-24"
 			>
 				<header class="select-none">
 					<h1 class="mb-8 text-6xl font-bold">
 						<a href="/">library</a>
+						<a
+							href="https://hornik.dev"
+							class="-ml-4 text-3xl text-neutral-400"
+							>.hornik.dev</a
+						>
 					</h1>
+					<p>
+						An archive of my theses, seminar papers, seminar notes,
+						and articles.
+					</p>
 				</header>
 			</div>
-			<main
-				class="flex grow flex-col pb-24 lg:pb-40 *:pt-16 *:pb-8 [&>*:first-child]:pt-24"
-			>
+			<main class="flex grow flex-col pb-24 pt-12 lg:pb-40 lg:pt-24">
 				<slot />
 			</main>
 		</div>
