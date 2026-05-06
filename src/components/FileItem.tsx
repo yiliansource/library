@@ -5,7 +5,7 @@ import {
 	SpinnerIcon,
 	XIcon,
 } from "@phosphor-icons/react";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { FileData } from "../types/file-data";
 
 export interface FileItemProps {
@@ -41,7 +41,7 @@ export function FileItem({ data }: FileItemProps) {
 									.map((s) => s.trim()) ?? []),
 								new Date(data.updated_at).getFullYear(),
 							].map((l, i, a) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+								// biome-ignore lint/suspicious/noArrayIndexKey: keys wont change
 								<React.Fragment key={i}>
 									<span>{l}</span>
 									{i + 1 !== a.length && (
@@ -107,6 +107,32 @@ function PasswordModal({
 	const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 	const [passwordSuccess, setPasswordSuccess] = useState(false);
 
+	const passwordInputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (open) {
+			requestAnimationFrame(() => {
+				passwordInputRef.current?.focus();
+			});
+		}
+	}, [open]);
+
+	useEffect(() => {
+		if (!open) return;
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				onClose?.();
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [open, onClose]);
+
 	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPasswordInput(e.target.value);
 	};
@@ -143,6 +169,10 @@ function PasswordModal({
 				<form
 					className="relative m-auto w-full max-w-sm bg-background px-6 py-8 rounded-sm"
 					onClick={(e) => void e.stopPropagation()}
+					onSubmit={(e) => {
+						e.preventDefault();
+						void handleSubmitPrompt();
+					}}
 				>
 					<p className="mb-4">
 						A password is required to view{" "}
@@ -164,6 +194,7 @@ function PasswordModal({
 							type="password"
 							autoComplete="off"
 							value={passwordInput}
+							ref={passwordInputRef}
 							onChange={handlePasswordChange}
 							className="border border-neutral-300 rounded-sm w-full px-2 py-1"
 						/>

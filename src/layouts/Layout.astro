@@ -2,6 +2,9 @@
 import "@fontsource-variable/inter/wght.css";
 import "../styles/global.css";
 import ThemeIcon from "../components/ThemeIcon.astro";
+
+const description =
+	"An archive of my theses, seminar papers, seminar notes, and articles.";
 ---
 
 <!doctype html>
@@ -9,9 +12,25 @@ import ThemeIcon from "../components/ThemeIcon.astro";
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" href="/favicon.ico" sizes="any" />
+		<link rel="icon" type="image/svg+xml" href="/apple-touch-icon.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="192x192"
+			href="/android-chrome-192x192.png"
+		/>
+
+		<meta name="theme-color" content="#111827" />
 		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
 		<title>Library — Ian Hornik</title>
 	</head>
 	<body>
@@ -25,16 +44,14 @@ import ThemeIcon from "../components/ThemeIcon.astro";
 					<h1
 						class="inline-flex flex-wrap items-end mb-8 text-6xl font-bold"
 					>
-						<a href="/">library</a>
+						<a class="hover:underline" href="/">library</a>
 						<a
 							href="https://hornik.dev"
-							class="lg:-ml-2 text-3xl text-silent">.hornik.dev</a
+							class="hover:underline lg:-ml-2 text-3xl text-silent"
+							>.hornik.dev</a
 						>
 					</h1>
-					<p>
-						An archive of my theses, seminar papers, seminar notes,
-						and articles.
-					</p>
+					<p>{description}</p>
 				</header>
 				<footer class="mt-6 lg:mt-auto">
 					<div
