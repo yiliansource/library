@@ -1,10 +1,39 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+	--color-background: var(--color-background);
+	--color-text: var(--color-text);
+	--color-muted: var(--color-text-muted);
+	--color-silent: var(--color-text-silent);
+
+	--font-body: var(--font-body);
+}
+
+:root {
+	--color-background: var(--color-neutral-50);
+	--color-text: var(--color-neutral-900);
+	--color-text-muted: var(--color-neutral-600);
+	--color-text-silent: var(--color-neutral-300);
+
+	--font-body: "Inter Variable", sans-serif;
+}
+
+html.dark {
+	--color-background: var(--color-neutral-900);
+	--color-text: var(--color-neutral-100);
+	--color-text-muted: var(--color-neutral-400);
+	--color-text-silent: var(--color-neutral-700);
+}
+
 html,
 body {
 	margin: 0;
 	width: 100%;
 	height: 100%;
 
-	font-family: "Inter Variable", sans-serif;
+	background-color: var(--color-background);
+	color: var(--color-text);
+	font-family: var(--font-body);
 }

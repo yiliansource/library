@@ -25,6 +25,9 @@
 			"remote": true,
 		}
 	],
+	"vars": {
+		"COOKIE_SECRET": "keyboardcat"
+	},
 	"observability": {
 		"enabled": true
 	}
