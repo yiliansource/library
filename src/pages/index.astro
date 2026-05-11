@@ -4,6 +4,8 @@ import { FileItem } from "../components/FileItem";
 import Layout from "../layouts/Layout.astro";
 import type { FileData } from "../types/file-data";
 
+export const prerender = false;
+
 const { results } = await env.library_data
 	.prepare("SELECT * FROM files")
 	.run<FileData>();
