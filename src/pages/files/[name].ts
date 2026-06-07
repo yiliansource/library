@@ -16,12 +16,17 @@ async function getFileRow(fileName: string): Promise<FileData | null> {
 		.first<FileData>();
 }
 
-async function streamR2File(row: FileData): Promise<Response> {
+async function streamR2File(
+	row: FileData,
+	download: boolean = false,
+): Promise<Response> {
 	const object = await env.library_files.get(row.file_name);
 
 	if (!object) {
 		return new Response("File object not found.", { status: 404 });
 	}
+
+	const disposition = download ? "attachment" : "inline";
 
 	const headers = new Headers();
 	object.writeHttpMetadata(headers);
@@ -32,7 +37,7 @@ async function streamR2File(row: FileData): Promise<Response> {
 	);
 	headers.set(
 		"Content-Disposition",
-		`inline; filename="${encodeURIComponent(row.file_name)}"`,
+		`${disposition}; filename="${encodeURIComponent(row.file_name)}"`,
 	);
 	headers.set("Cache-Control", "private, no-store");
 
@@ -144,5 +149,7 @@ export const GET: APIRoute = async ({ params, request, cookies }) => {
 		}
 	}
 
-	return streamR2File(row);
+	const requestUrl = new URL(request.url);
+
+	return streamR2File(row, requestUrl.searchParams.get("download") === "1");
 };

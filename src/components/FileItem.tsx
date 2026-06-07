@@ -1,5 +1,6 @@
 import {
 	CheckIcon,
+	DownloadIcon,
 	FilePdfIcon,
 	LockIcon,
 	SpinnerIcon,
@@ -12,25 +13,47 @@ export interface FileItemProps {
 	data: FileData;
 }
 
-const navigateToFile = (data: FileData) =>
-	(window.location.href = `/files/${data.file_name}`);
+type PasswordModalIntent = "none" | "view" | "download";
+
+const navigateToFile = (data: FileData, download: boolean = false) =>
+	(window.location.href = `/files/${data.file_name}${download ? "?download=1" : ""}`);
 
 export function FileItem({ data }: FileItemProps) {
-	const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+	const [passwordModalIntent, setPasswordModalIntent] =
+		useState<PasswordModalIntent>("none");
 
 	const handleViewFile = () => {
 		if (data.password_hash) {
-			setPasswordModalOpen(true);
+			setPasswordModalIntent("view");
 		} else {
 			navigateToFile(data);
+		}
+	};
+	const handleDownloadFile = () => {
+		if (data.password_hash) {
+			setPasswordModalIntent("download");
+		} else {
+			navigateToFile(data, true);
 		}
 	};
 
 	return (
 		<>
 			<div className="group px-3 py-6 flex flex-col hover:bg-black/5 dark:hover:bg-white/5">
-				<div className="flex flex-row gap-2">
-					<div className="grow">
+				<div>
+					<div className="float-right ml-2 pt-1">
+						<p className="text-sm text-muted">
+							{new Date(data.updated_at).toLocaleDateString(
+								"en-US",
+								{
+									year: "numeric",
+									month: "long",
+									day: "numeric",
+								},
+							)}
+						</p>
+					</div>
+					<div>
 						<p className="text-xl font-semibold">
 							{data.display_name}
 						</p>
@@ -51,23 +74,11 @@ export function FileItem({ data }: FileItemProps) {
 							))}
 						</p>
 					</div>
-					<div className="ml-auto mr-0 shrink-0 pt-1">
-						<p className="text-sm text-muted">
-							{new Date(data.updated_at).toLocaleDateString(
-								"en-US",
-								{
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								},
-							)}
-						</p>
-					</div>
 				</div>
 				<p className="mb-4">{data.description}</p>
-				<div className="flex flex-row items-center">
+				<div className="flex flex-row flex-wrap items-center">
 					<button
-						className="py-1 inline-flex flex-row items-center gap-1 text-red-600 dark:text-red-400 cursor-pointer"
+						className="py-1 mr-3 inline-flex flex-row items-center gap-1 text-red-600 dark:text-red-400 cursor-pointer"
 						type="button"
 						onClick={handleViewFile}
 					>
@@ -76,6 +87,22 @@ export function FileItem({ data }: FileItemProps) {
 							View
 						</span>
 					</button>
+					<button
+						className="py-1 inline-flex flex-row items-center gap-1 text-stone-600 dark:text-stone-400 cursor-pointer"
+						type="button"
+						onClick={handleDownloadFile}
+					>
+						<DownloadIcon className="inline-block size-5" />
+						<span className="text-xs uppercase font-semibold">
+							Download
+						</span>
+					</button>
+					{data.wip && (
+						<span className="text-sm text-muted">
+							<span className="mx-2">·</span>
+							<span>Work in progress</span>
+						</span>
+					)}
 					{data.password_hash && (
 						<span className="text-sm text-muted">
 							<span className="mx-2">·</span>
@@ -85,9 +112,10 @@ export function FileItem({ data }: FileItemProps) {
 				</div>
 			</div>
 			<PasswordModal
-				open={passwordModalOpen}
+				open={passwordModalIntent !== "none"}
+				intent={passwordModalIntent}
 				data={data}
-				onClose={() => setPasswordModalOpen(false)}
+				onClose={() => setPasswordModalIntent("none")}
 			/>
 		</>
 	);
@@ -96,10 +124,12 @@ export function FileItem({ data }: FileItemProps) {
 function PasswordModal({
 	open,
 	data,
+	intent,
 	onClose,
 }: {
 	open: boolean;
 	data: FileData;
+	intent: PasswordModalIntent;
 	onClose?: () => void;
 }) {
 	const [passwordInput, setPasswordInput] = useState("");
@@ -114,6 +144,11 @@ function PasswordModal({
 			requestAnimationFrame(() => {
 				passwordInputRef.current?.focus();
 			});
+		} else {
+			setPasswordInput("");
+			setPasswordError(null);
+			setPasswordSubmitting(false);
+			setPasswordSuccess(false);
 		}
 	}, [open]);
 
@@ -158,7 +193,11 @@ function PasswordModal({
 			setPasswordSuccess(false);
 		} else if (res.status === 200) {
 			setPasswordSuccess(true);
-			navigateToFile(data);
+			navigateToFile(data, intent === "download");
+
+			setTimeout(() => {
+				onClose?.();
+			}, 500);
 		}
 		setPasswordSubmitting(false);
 	};
@@ -175,7 +214,7 @@ function PasswordModal({
 					}}
 				>
 					<p className="mb-4">
-						A password is required to view{" "}
+						A password is required to {intent}{" "}
 						<span className="font-semibold">
 							{data.display_name}
 						</span>

@@ -7,5 +7,6 @@ CREATE TABLE files (
     tags TEXT,
     file_name TEXT NOT NULL UNIQUE,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    wip NUMBER,
     password_hash TEXT
 );

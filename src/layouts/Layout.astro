@@ -2,9 +2,8 @@
 import "@fontsource-variable/inter/wght.css";
 import "../styles/global.css";
 import ThemeIcon from "../components/ThemeIcon.astro";
-
-const description =
-	"An archive of my theses, seminar papers, seminar notes, and articles.";
+import { siteConfig } from "../site.config.ts";
+import { RssIcon } from "@phosphor-icons/react";
 ---
 
 <!doctype html>
@@ -30,8 +29,8 @@ const description =
 
 		<meta name="theme-color" content="#111827" />
 		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content={description} />
-		<title>Library — Ian Hornik</title>
+		<meta name="description" content={siteConfig.description} />
+		<title></title>
 	</head>
 	<body>
 		<div
@@ -51,7 +50,7 @@ const description =
 							>.hornik.dev</a
 						>
 					</h1>
-					<p>{description}</p>
+					<p>{siteConfig.description}</p>
 				</header>
 				<footer class="mt-6 lg:mt-auto">
 					<div
@@ -60,7 +59,14 @@ const description =
 						<p class="text-sm">
 							Copyright &copy; {new Date().getFullYear()} Ian Hornik
 						</p>
-						<ThemeIcon />
+						<div class="flex flex-row gap-2">
+							<a href="/rss.xml">
+								<RssIcon
+									className="size-6 text-black dark:text-white"
+								/>
+							</a>
+							<ThemeIcon />
+						</div>
 					</div>
 				</footer>
 			</div>
