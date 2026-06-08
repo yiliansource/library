@@ -1,14 +1,33 @@
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
+import * as z from "zod";
 import {
 	base64ToArrayBuffer,
 	base64ToBytes,
 	bytesToArrayBuffer,
 	timingSafeEqualBytes,
 } from "../../lib/bytes";
+import { createToken, verifyToken } from "../../lib/tokens";
 import type { FileData } from "../../types/file-data";
 
 export const prerender = false;
+
+export enum FileUnlockResponse {
+	OK = "OK",
+	OK_NOT_LOCKED = "OK_NOT_LOCKED",
+	OK_ALREADY_UNLOCKED = "OK_ALREADY_UNLOCKED",
+	PASSWORD_INVALID = "PASSWORD_INVALID",
+	MISSING_NAME = "MISSING_NAME",
+	NOT_FOUND = "NOT_FOUND",
+	VERIFICATION_ERROR = "VERIFICATION_ERROR",
+}
+
+const FileUnlockSchema = z.object({
+	password: z.string().optional(),
+	remember: z.boolean().optional(),
+});
+
+export type FileUnlockSchema = z.infer<typeof FileUnlockSchema>;
 
 async function getFileRow(fileName: string): Promise<FileData | null> {
 	return await env.library_data
@@ -22,59 +41,20 @@ async function getFileRow(fileName: string): Promise<FileData | null> {
 		.first<FileData>();
 }
 
-const encoder = new TextEncoder();
-
-function base64url(bytes: ArrayBuffer | Uint8Array): string {
-	const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-	let binary = "";
-	for (const byte of arr) binary += String.fromCharCode(byte);
-
-	return btoa(binary)
-		.replaceAll("+", "-")
-		.replaceAll("/", "_")
-		.replaceAll("=", "");
-}
-
-async function hmac(secret: string, message: string): Promise<string> {
-	const key = await crypto.subtle.importKey(
-		"raw",
-		encoder.encode(secret),
-		{ name: "HMAC", hash: "SHA-256" },
-		false,
-		["sign"],
-	);
-
-	const signature = await crypto.subtle.sign(
-		"HMAC",
-		key,
-		encoder.encode(message),
-	);
-	return base64url(signature);
-}
-
-async function createToken(secret: string): Promise<string> {
-	const payload = {
-		exp: Math.floor(Date.now() / 1000) + 15 * 60,
-	};
-
-	const payloadBase64 = base64url(encoder.encode(JSON.stringify(payload)));
-	const signature = await hmac(secret, payloadBase64);
-
-	return `${payloadBase64}.${signature}`;
-}
-
 async function verifyPassword(
 	password: string,
 	passwordHash: string,
 ): Promise<boolean> {
 	const parts = passwordHash.split(":");
-	if (parts.length !== 4 || parts[0] !== "pbkdf2-sha256") {
-		throw new Error("Unsupported password hash format.");
-	}
+	if (parts.length !== 4) throw new Error("Malformed password hash.");
 
-	const iterations = Number(parts[1]);
-	const salt = base64ToArrayBuffer(parts[2]);
-	const expectedHash = base64ToBytes(parts[3]);
+	const [hashFormat, iterationsText, saltBase64, expectedHashBase64] = parts;
+	if (hashFormat !== "pbkdf2-sha256")
+		throw new Error("Unsupported password hash format.");
+
+	const iterations = Number(iterationsText);
+	const salt = base64ToArrayBuffer(saltBase64);
+	const expectedHash = base64ToBytes(expectedHashBase64);
 
 	if (!Number.isSafeInteger(iterations) || iterations < 100_000) {
 		throw new Error("Invalid PBKDF2 iteration count");
@@ -104,43 +84,57 @@ async function verifyPassword(
 	return timingSafeEqualBytes(actualHash, expectedHash);
 }
 
+function createUnlockResponse(response: FileUnlockResponse) {
+	const statusCodeLookup: Record<FileUnlockResponse, number> = {
+		OK: 200,
+		OK_NOT_LOCKED: 200,
+		OK_ALREADY_UNLOCKED: 200,
+		PASSWORD_INVALID: 401,
+		MISSING_NAME: 400,
+		NOT_FOUND: 404,
+		VERIFICATION_ERROR: 500,
+	};
+	return new Response(response, { status: statusCodeLookup[response] });
+}
+
 export const POST: APIRoute = async ({ params, request, cookies }) => {
 	const name = params.name;
-	if (!name) {
-		return new Response("Missing name.", { status: 400 });
-	}
+	if (!name) return createUnlockResponse(FileUnlockResponse.MISSING_NAME);
 
 	const row = await getFileRow(name);
-	if (!row) {
-		return new Response("Not found.", { status: 404 });
-	}
+	if (!row) return createUnlockResponse(FileUnlockResponse.NOT_FOUND);
+	if (!row.password_hash)
+		return createUnlockResponse(FileUnlockResponse.OK_NOT_LOCKED);
 
-	if (!row.password_hash) {
-		return new Response("File already unlocked.", { status: 200 });
-	}
+	const body = await request.json();
+	const parsedBody = z.parse(FileUnlockSchema, body);
 
-	const body = (await request.json()) as { password?: string };
-	const password = String(body.password ?? "");
+	const accessTokenCookie = `access_token-${row.file_id}`;
 
 	let ok = false;
-	try {
-		ok = await verifyPassword(password, row.password_hash);
-	} catch (e) {
-		console.error(e);
-		return new Response("An error occurred while verifying the password.", {
-			status: 500,
-		});
+	if (!parsedBody.password) {
+		const accessToken = cookies.get(accessTokenCookie);
+		if (accessToken) {
+			ok = await verifyToken(env.COOKIE_SECRET, accessToken.value);
+		}
+	} else {
+		try {
+			ok = await verifyPassword(parsedBody.password, row.password_hash);
+		} catch (e) {
+			console.error(e);
+			return createUnlockResponse(FileUnlockResponse.VERIFICATION_ERROR);
+		}
 	}
 
 	if (ok) {
 		const token = await createToken(env.COOKIE_SECRET);
-		cookies.set(`access_token-${row.file_id}`, token, {
+		cookies.set(accessTokenCookie, token, {
 			path: "/",
-			maxAge: 60 * 15,
-			httpOnly: true,
+			maxAge: parsedBody.remember ? 60 * 60 * 24 * 7 : 60,
 		});
-		return new Response("OK!", { status: 200 });
+
+		return createUnlockResponse(FileUnlockResponse.OK);
 	} else {
-		return new Response("PASSWORD_INVALID", { status: 401 });
+		return createUnlockResponse(FileUnlockResponse.PASSWORD_INVALID);
 	}
 };

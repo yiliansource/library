@@ -11,21 +11,12 @@ import { RssIcon } from "@phosphor-icons/react";
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" href="/favicon.ico" sizes="any" />
-		<link rel="icon" type="image/svg+xml" href="/apple-touch-icon.png" />
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="32x32"
-			href="/favicon-32x32.png"
-		/>
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="192x192"
-			href="/android-chrome-192x192.png"
-		/>
+
+		<link rel="icon" type="image/svg" href="/icon.svg" />
+		<link rel="apple-touch-icon" href="/apple-icon-180.png" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+
+		<link rel="manifest" href="/manifest.webmanifest" />
 
 		<meta name="theme-color" content="#111827" />
 		<meta name="generator" content={Astro.generator} />
@@ -39,7 +30,7 @@ import { RssIcon } from "@phosphor-icons/react";
 			<div
 				class="lg:h-screen flex flex-col justify-between pt-12 lg:sticky lg:top-0 lg:w-105 lg:pt-24 lg:pb-4"
 			>
-				<header class="select-none">
+				<header class="relative select-none">
 					<h1
 						class="inline-flex flex-wrap items-end mb-8 text-6xl font-bold"
 					>
@@ -51,8 +42,18 @@ import { RssIcon } from "@phosphor-icons/react";
 						>
 					</h1>
 					<p>{siteConfig.description}</p>
+
+					<div
+						class="absolute -top-8 md:-top-13 -left-4 md:-left-10 opacity-5"
+					>
+						<img
+							src="/icon.svg"
+							class="w-30 md:w-40"
+							draggable="false"
+						/>
+					</div>
 				</header>
-				<footer class="mt-6 lg:mt-auto">
+				<footer class="mt-6 lg:mt-auto select-none">
 					<div
 						class="flex flex-row items-center justify-between text-muted"
 					>

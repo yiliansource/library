@@ -15,15 +15,16 @@ export const GET: APIRoute = () => {
 			theme_color: "#111827",
 			icons: [
 				{
-					src: "/android-chrome-192x192.png",
+					src: "/manifest-icon-192.maskable.png",
 					sizes: "192x192",
 					type: "image/png",
+					purpose: "maskable",
 				},
 				{
-					src: "/android-chrome-192x192.png",
+					src: "/manifest-icon-512.maskable.png",
 					sizes: "512x512",
 					type: "image/png",
-					purpose: "any maskable",
+					purpose: "maskable",
 				},
 			],
 		}),
