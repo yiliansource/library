@@ -1,8 +1,16 @@
 const encoder = new TextEncoder();
 
-export async function createToken(secret: string): Promise<string> {
+export const COOKIE_MAX_AGE = 60;
+export const LONG_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+
+export async function createToken(
+	secret: string,
+	long = false,
+): Promise<string> {
 	const payload = {
-		exp: Math.floor(Date.now() / 1000) + 15 * 60,
+		exp:
+			Math.floor(Date.now() / 1000) +
+			(long ? LONG_COOKIE_MAX_AGE : COOKIE_MAX_AGE),
 	};
 
 	const payloadBase64 = base64url(encoder.encode(JSON.stringify(payload)));
@@ -31,7 +39,6 @@ export async function verifyToken(
 			fromBase64url(payloadBase64),
 		);
 		const payload = JSON.parse(payloadJson) as { exp?: number };
-
 		if (!payload.exp) return false;
 
 		return payload.exp > Math.floor(Date.now() / 1000);

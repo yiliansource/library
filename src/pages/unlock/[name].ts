@@ -7,7 +7,12 @@ import {
 	bytesToArrayBuffer,
 	timingSafeEqualBytes,
 } from "../../lib/bytes";
-import { createToken, verifyToken } from "../../lib/tokens";
+import {
+	COOKIE_MAX_AGE,
+	createToken,
+	LONG_COOKIE_MAX_AGE,
+	verifyToken,
+} from "../../lib/tokens";
 import type { FileData } from "../../types/file-data";
 
 export const prerender = false;
@@ -130,7 +135,7 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 		const token = await createToken(env.COOKIE_SECRET);
 		cookies.set(accessTokenCookie, token, {
 			path: "/",
-			maxAge: parsedBody.remember ? 60 * 60 * 24 * 7 : 60,
+			maxAge: parsedBody.remember ? LONG_COOKIE_MAX_AGE : COOKIE_MAX_AGE,
 		});
 
 		return createUnlockResponse(FileUnlockResponse.OK);
