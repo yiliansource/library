@@ -94,7 +94,7 @@ export function FileAccessButton({ data, intent }: FileAccessButtonProps) {
 				</span>
 				{isVerifying && (
 					<span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-5">
-						<span className="inline-block box-border size-5 border-4 border-white border-b-transparent rounded-full animate-spin"></span>
+						<span className="inline-block box-border size-5 border-4 border-neutral-800 dark:border-neutral-200 border-b-transparent! rounded-full animate-spin"></span>
 					</span>
 				)}
 			</button>
@@ -108,17 +108,4 @@ export function FileAccessButton({ data, intent }: FileAccessButtonProps) {
 			)}
 		</>
 	);
-}
-
-{
-	/* <button
-						className="py-1 inline-flex flex-row items-center gap-1 text-stone-600 dark:text-stone-400 cursor-pointer"
-						type="button"
-						onClick={handleDownloadFile}
-					>
-						<DownloadIcon className="inline-block size-5" />
-						<span className="text-xs uppercase font-semibold">
-							Download
-						</span>
-					</button> */
 }
