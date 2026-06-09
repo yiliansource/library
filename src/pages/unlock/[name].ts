@@ -132,7 +132,10 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 	}
 
 	if (ok) {
-		const token = await createToken(env.COOKIE_SECRET);
+		const token = await createToken(
+			env.COOKIE_SECRET,
+			!!parsedBody.remember,
+		);
 		cookies.set(accessTokenCookie, token, {
 			path: "/",
 			maxAge: parsedBody.remember ? LONG_COOKIE_MAX_AGE : COOKIE_MAX_AGE,
