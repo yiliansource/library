@@ -121,6 +121,11 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 		const accessToken = cookies.get(accessTokenCookie);
 		if (accessToken) {
 			ok = await verifyToken(env.COOKIE_SECRET, accessToken.value);
+			if (ok) {
+				return createUnlockResponse(
+					FileUnlockResponse.OK_ALREADY_UNLOCKED,
+				);
+			}
 		}
 	} else {
 		try {
